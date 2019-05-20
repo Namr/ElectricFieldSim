@@ -42,13 +42,13 @@ int main()
 
   
   
-    // check OpenGL error
+  // check OpenGL error
   GLenum err;
   while ((err = glGetError()) != GL_NO_ERROR) {
     cerr << "OpenGL error: " << err << endl;
   }
 
-  
+  //camera initial settings
   Camera cam;
   cam = Camera();
   cam.view = glm::lookAt(
@@ -56,15 +56,19 @@ int main()
     glm::vec3(0.0f, 0.0f, 0.0f), // camera center
     glm::vec3(0.0f, 0.0f, -1.0f) // up axis
     );
-  
+
+  //init models for the point charges and field arrows, and the corresponding arrays that keep track of their data
   Model charge;
-
   charge = Model();
-
   charge.loadFromObj("assets/sphere.obj", 0);
-  
+  std::vector<glm::vec3> positiveCharges;
+  std::vector<glm::vec3> negativeCharges;
+
   float lastTime;
-  // Get mouse position
+  int posChargeKeyDown = 0;
+  int negChargeKeyDown = 0;
+  
+  // setup camera movement vars
   double xpos, ypos;
   glm::vec3 position = glm::vec3( 0, 0, 5 );
   float speed = 3.0f; // 3 units / second
@@ -83,6 +87,11 @@ int main()
 
     glfwGetCursorPos(window,&xpos, &ypos);
     glfwSetCursorPos(window,800/2, 600/2);
+
+    
+    /////////////////////////////////////////////////////////////////////////
+    //recalculate camera position and direction based on mouse input and keys
+    /////////////////////////////////////////////////////////////////////////
     
     horizontalAngle += mouseSpeed * deltaTime * float(800/2 - xpos );
     verticalAngle   += mouseSpeed * deltaTime * float( 600/2 - ypos );
@@ -100,35 +109,74 @@ int main()
       );
     glm::vec3 up = glm::cross( right, direction );
 
-    if (glfwGetKey(window,GLFW_KEY_W ) == GLFW_PRESS){
+    if (glfwGetKey(window,GLFW_KEY_W ) == GLFW_PRESS)
+    {
       position += direction * deltaTime * speed;
     }
-    if (glfwGetKey(window,GLFW_KEY_S ) == GLFW_PRESS){
+    if (glfwGetKey(window,GLFW_KEY_S ) == GLFW_PRESS)
+    {
       position -= direction * deltaTime * speed;
     }
-    if (glfwGetKey(window,GLFW_KEY_D ) == GLFW_PRESS){
+    if (glfwGetKey(window,GLFW_KEY_D ) == GLFW_PRESS)
+    {
       position += right * deltaTime * speed;
     }
-    if (glfwGetKey(window,GLFW_KEY_A ) == GLFW_PRESS){
+    if (glfwGetKey(window,GLFW_KEY_A ) == GLFW_PRESS)
+    {
       position -= right * deltaTime * speed;
     }
 
-
-
+    
     cam.view = glm::lookAt(
       position, // position
       position+direction, // camera center
       up // up axis
     );
-    //draw code
+    
+    //add charges to the scene based on key presses
+    if(glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+    {
+      posChargeKeyDown = 1;
+    }
+    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+    {
+      negChargeKeyDown = 1;
+    }
+    
+    if(glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE && posChargeKeyDown == 1)
+    {
+      positiveCharges.push_back(position);
+      posChargeKeyDown = 0;
+    }
+    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE && negChargeKeyDown == 1)
+    {
+      negativeCharges.push_back(position);
+      negChargeKeyDown = 0;
+    }
+
+    /////////////
+    //draw code//
+    /////////////
+    
     // Clear the screen to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-    //DRAW HERE
-    charge.render(cam, 1.0f, 0.0f, 0.0f, 1.0f);
-    
+    //render point charges in the list
+    for(glm::vec3 pos : positiveCharges)
+    {
+      charge.model = glm::mat4(1);
+      charge.model = glm::translate(charge.model, pos);
+      charge.render(cam, 1.0f, 0.0f, 0.0f, 1.0f);
+    }
+    for(glm::vec3 pos : negativeCharges)
+    {
+      charge.model = glm::mat4(1);
+      charge.model = glm::translate(charge.model, pos);
+      charge.render(cam, 0.0f, 0.0f, 1.0f, 1.0f);
+    }
+	
     lastTime = currentTime;
   }
   
