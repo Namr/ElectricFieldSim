@@ -52,9 +52,9 @@ int main()
   Camera cam;
   cam = Camera();
   cam.view = glm::lookAt(
-    glm::vec3(1.0f, 3.2f, 5.2f), // position
-    glm::vec3(0.0f, 0.0f, 0.0f), // camera center
-    glm::vec3(0.0f, 0.0f, -1.0f) // up axis
+    glm::vec3(150.0f, 150.0f, 150.0f), // position
+    glm::vec3(50.0f, 50.0f, 50.0f), // camera center
+    glm::vec3(0.0f, 0.0f, 1.0f) // up axis
     );
 
   //init models for the point charges and field arrows, and the corresponding arrays that keep track of their data
@@ -64,6 +64,10 @@ int main()
   std::vector<glm::vec3> positiveCharges;
   std::vector<glm::vec3> negativeCharges;
 
+  Model arrow;
+  arrow = Model();
+  arrow.loadFromObj("assets/arrow.obj", 0);
+  
   float lastTime;
   int posChargeKeyDown = 0;
   int negChargeKeyDown = 0;
@@ -127,12 +131,6 @@ int main()
     }
 
     
-    cam.view = glm::lookAt(
-      position, // position
-      position+direction, // camera center
-      up // up axis
-    );
-    
     //add charges to the scene based on key presses
     if(glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
     {
@@ -176,7 +174,22 @@ int main()
       charge.model = glm::translate(charge.model, pos);
       charge.render(cam, 0.0f, 0.0f, 1.0f, 1.0f);
     }
-	
+
+    int edgeSize = 5;
+    int edgeSpace = 20;
+    for(int x = 0; x < edgeSize; x++)
+    {
+      for(int y = 0; y < edgeSize; y++)
+      {
+	for(int z = 0; z < edgeSize; z++)
+	{
+	  glm::vec3 arrowPos = glm::vec3(x * edgeSpace, y * edgeSpace, z * edgeSpace);
+	  arrow.model = glm::mat4(1);
+	  arrow.model = glm::translate(arrow.model, arrowPos);
+	  arrow.render(cam, 1.0f, 1.0f, 1.0f, 1.0f);
+	}
+      }
+    }
     lastTime = currentTime;
   }
   

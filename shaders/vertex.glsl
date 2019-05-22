@@ -14,5 +14,5 @@ out vec2 TexCoords;
 void main()
 {
     gl_Position = proj * view * model * parentPos * vec4(position, 1.0);
-	TexCoords = texCoords;
+    TexCoords = texCoords;
 }
