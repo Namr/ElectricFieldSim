@@ -67,12 +67,20 @@ void Model::GLInit()
 
     // catch any errors
     GLint success;
-    GLchar infoLog[512];
-
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
+    if(!success)
+    {
+      std::cout << "Shader Error vertex" << std::endl; 
+    }
+    
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
+    
+    if(!success)
+    {
+      std::cout << "Shader Error fragment" << std::endl; 
+    }
+    
     // create a program from the shaders
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -111,14 +119,8 @@ void Model::GLInit()
     uniView = glGetUniformLocation(shaderProgram, "view");
     uniProj = glGetUniformLocation(shaderProgram, "proj");
     uniParent = glGetUniformLocation(shaderProgram, "parentPos");
-    uniIsTexOn = glGetUniformLocation(shaderProgram, "isTexOn");
-    uniTexture = glGetUniformLocation(shaderProgram, "textureArray");
-    uniLayer = glGetUniformLocation(shaderProgram, "layer");
-    uniMRIView = glGetUniformLocation(shaderProgram, "MRIView");
 
     glUniform4f(uniColor, 1.0f, 0.0f, 0.0f, 1.0f);
-    glUniform1i(uniIsTexOn, 0);
-    glUniform1i(uniView, view);
 }
 
 void Model::render(Camera &camera)
@@ -132,8 +134,6 @@ void Model::render(Camera &camera)
     glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(camera.view));
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(camera.proj));
     glUniformMatrix4fv(uniParent, 1, GL_FALSE, glm::value_ptr(parentPosition));
-    glUniform1f(uniLayer, layer);
-    glUniform1i(uniMRIView, view);
 
     glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_INT, 0);
 }
@@ -154,12 +154,6 @@ void Model::render(Camera &camera, float r, float g, float b, float a)
     glUniform4f(uniColor, r, g, b, a);
 
     glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_INT, 0);
-}
-
-void Model::addTexture(int id)
-{
-    glUniform1i(uniIsTexOn, 1);
-    glUniform1i(uniTexture, id);
 }
 
 GLuint Model::loadShader(const char *filepath, GLenum type)

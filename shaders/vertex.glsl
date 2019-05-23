@@ -1,7 +1,6 @@
 #version 150 core
 
 in vec3 position;
-
 in vec2 texCoords;
 
 uniform mat4 model;
