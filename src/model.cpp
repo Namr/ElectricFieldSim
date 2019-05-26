@@ -28,6 +28,12 @@ void Model::loadFromObj(std::string path, int hasTextures)
             vertices.push_back(attrib.vertices[3 * index.vertex_index + 0]);
             vertices.push_back(attrib.vertices[3 * index.vertex_index + 1]);
             vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]);
+
+	    //add normals
+	    vertices.push_back(attrib.normals[3 * index.normal_index + 0]);
+	    vertices.push_back(attrib.normals[3 * index.normal_index + 1]);
+	    vertices.push_back(attrib.normals[3 * index.normal_index + 2]);
+	    
             if (hasTextures == 1)
             {
                 //add texture coordinates
@@ -108,11 +114,15 @@ void Model::GLInit()
     // pass vertex positions to shader program
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
+    GLint normAttrib = glGetAttribLocation(shaderProgram, "normal");
+    glEnableVertexAttribArray(normAttrib);
+    glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	
     GLint texcoordsAttrib = glGetAttribLocation(shaderProgram, "texCoords");
     glEnableVertexAttribArray(texcoordsAttrib);
-    glVertexAttribPointer(texcoordsAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(texcoordsAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
     uniColor = glGetUniformLocation(shaderProgram, "objColor");
     uniTrans = glGetUniformLocation(shaderProgram, "model");
