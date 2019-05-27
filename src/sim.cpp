@@ -17,7 +17,8 @@ using namespace std;
 
 
 static GLuint load_shader(char *filepath, GLenum type);
-
+static float lerp(float a, float b, float f);
+static float mapNum(float s, float a1, float a2, float b1, float b2);
 
 int main()
 {
@@ -39,8 +40,8 @@ int main()
   glewInit();
 
   glEnable(GL_DEPTH_TEST);
-
-  
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
   
   // check OpenGL error
   GLenum err;
@@ -74,11 +75,10 @@ int main()
   
   // setup camera movement vars
   double xpos, ypos;
-  glm::vec3 position = glm::vec3( 0, 0, 5 );
+  glm::vec3 position = glm::vec3( 0, 0, 0);
   float speed = 3.0f; // 3 units / second
-  float mouseSpeed = 0.3f;
-  float horizontalAngle = 3.14f;
-  float verticalAngle = 0.0f;
+  float pitch = 0.0f;
+  float yaw = 0.0f;
   
   //main loop
   while(!glfwWindowShouldClose(window))
@@ -97,40 +97,33 @@ int main()
     //recalculate camera position and direction based on mouse input and keys
     /////////////////////////////////////////////////////////////////////////
     
-    horizontalAngle += mouseSpeed * deltaTime * float(800/2 - xpos );
-    verticalAngle   += mouseSpeed * deltaTime * float( 600/2 - ypos );
-
-    glm::vec3 direction(
-      cos(verticalAngle) * sin(horizontalAngle),
-      sin(verticalAngle),
-      cos(verticalAngle) * cos(horizontalAngle)
-      );
-
-    glm::vec3 right = glm::vec3(
-      sin(horizontalAngle - 3.14f/2.0f),
-      0,
-      cos(horizontalAngle - 3.14f/2.0f)
-      );
-    glm::vec3 up = glm::cross( right, direction );
-
     if (glfwGetKey(window,GLFW_KEY_W ) == GLFW_PRESS)
     {
-      position += direction * deltaTime * speed;
+      pitch -= speed * deltaTime;
     }
     if (glfwGetKey(window,GLFW_KEY_S ) == GLFW_PRESS)
     {
-      position -= direction * deltaTime * speed;
+      pitch -= speed * deltaTime;
     }
     if (glfwGetKey(window,GLFW_KEY_D ) == GLFW_PRESS)
     {
-      position += right * deltaTime * speed;
+      yaw -= speed * deltaTime;
     }
     if (glfwGetKey(window,GLFW_KEY_A ) == GLFW_PRESS)
     {
-      position -= right * deltaTime * speed;
+      yaw += speed * deltaTime;
     }
-
     
+    position.x = 50 + (cos(yaw)  * sin(pitch) * 200);
+    position.y = 50 + (sin(yaw) * sin(pitch) * 200);
+    position.z = 50 + (cos(pitch) * 200);
+
+    cam.view = glm::lookAt(
+        position,             // position
+        glm::vec3(50.0f, 50.0f, 50.0f), // camera center
+        glm::vec3(0.0f, 0.0f, 1.0f)                    // up axis
+    );
+	
     //add charges to the scene based on key presses
     if(glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
     {
@@ -186,7 +179,14 @@ int main()
 	  glm::vec3 arrowPos = glm::vec3(x * edgeSpace, y * edgeSpace, z * edgeSpace);
 	  arrow.model = glm::mat4(1);
 	  arrow.model = glm::translate(arrow.model, arrowPos);
-	  arrow.render(cam, 1.0f, 1.0f, 1.0f, 1.0f);
+
+	  float dist = sqrt(pow(arrowPos.x - 50.0f, 2) + pow(arrowPos.y - 50.0f, 2) + pow(arrowPos.z - 50.0f, 2));
+
+	  float alpha = 0.0f;
+	  if(dist <= 50.0f)
+	    alpha = mapNum(dist, 70.0f, 0.0f, 0.0f, 1.0f);
+
+	  arrow.render(cam, 1.0f, 1.0f, 1.0f, alpha);
 	}
       }
     }
@@ -198,6 +198,15 @@ int main()
   return 0;
 }
 
+static float lerp(float a, float b, float f)
+{
+    return a + f * (b - a);
+}
+
+static float mapNum(float s, float a1, float a2, float b1, float b2)
+{
+    return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
+}
 static GLuint load_shader(char *filepath, GLenum type)
 {
   FILE *file = fopen(filepath, "rb");
