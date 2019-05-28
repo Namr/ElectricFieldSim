@@ -139,7 +139,7 @@ int main()
     }
     if(glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE && negChargeKeyDown == 1)
     {
-      negativeCharges.push_back(position);
+      negativeCharges.push_back(glm::vec3(80.0f, 80.0f, 80.0f));
       negChargeKeyDown = 0;
     }
 
@@ -168,38 +168,67 @@ int main()
       charge.render(cam, 0.0f, 0.0f, 1.0f, 1.0f);
     }
 
-    int edgeSize = 5;
+    int edgeSize = 10;
     int edgeSpace = 20;
-    for(int x = 0; x < edgeSize; x++)
+    if(positiveCharges.size() > 0 || negativeCharges.size() > 0)
     {
-      for(int y = 0; y < edgeSize; y++)
+      for(int x = 0; x < edgeSize; x++)
       {
-	for(int z = 0; z < edgeSize; z++)
-	{
-	  glm::vec3 arrowPos = glm::vec3(x * edgeSpace, y * edgeSpace, z * edgeSpace);
-	  glm::vec3 closestCharge = glm::vec3(50.0f, 50.0f, 50.0f);
-	  
-	  glm::vec3 direction = glm::normalize(arrowPos - closestCharge);
-	  glm::mat4 arrowTransform = glm::lookAt(arrowPos, closestCharge, glm::vec3(0, 0, 1));
-	  
-	  arrow.model = glm::mat4(1);
-	  
-	  arrow.model *= glm::mat4(1, 0, 0, 0,
-				   0, 1, 0, 0,
-				   0, 0, 1, 0,
-				   0, 0, -1, 1);
-	  arrow.model *= glm::inverse(arrowTransform);
+	  for(int y = 0; y < edgeSize; y++)
+	  {
+	      for(int z = 0; z < edgeSize; z++)
+	      {
 
-			  
-	  float dist = sqrt(pow(arrowPos.x - closestCharge.x, 2) + pow(arrowPos.y - closestCharge.y, 2) + pow(arrowPos.z - closestCharge.z, 2));
-	  float alpha = 0.0f;
-	  if(dist <= 50.0f)
-	    alpha = mapNum(dist, 70.0f, 0.0f, 0.0f, 1.0f);
-	  if(dist <= 30.0f)
-	    alpha = 1.0f;
+		float dist = 10000.0f;
+		int chargeSign = 0;
+		
+		glm::vec3 arrowPos = glm::vec3(x * edgeSpace, y * edgeSpace, z * edgeSpace);
+		glm::vec3 closestCharge = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 direction = glm::vec3(0.0f, 0.0f, 0.0f);
+		
+		for(glm::vec3 pos : positiveCharges)
+		{
+		  direction +=  glm::normalize(arrowPos - pos);
+		  float tempDist = sqrt(pow(arrowPos.x - pos.x, 2) + pow(arrowPos.y - pos.y, 2) + pow(arrowPos.z - pos.z, 2));
+		  if(tempDist < dist)
+		  {
+		    dist = tempDist;
+		    closestCharge = pos;
+		    chargeSign = 1;
+		  }
+		}
+		
+		for(glm::vec3 pos : negativeCharges)
+		{
+		  direction +=  glm::normalize(pos - arrowPos);
+		  float tempDist = sqrt(pow(arrowPos.x - pos.x, 2) + pow(arrowPos.y - pos.y, 2) + pow(arrowPos.z - pos.z, 2));
+		  if(tempDist < dist)
+		  {
+		    dist = tempDist;
+		    closestCharge = pos;
+		    chargeSign = -1;
+		  }
+		}
+		
+		glm::mat4 arrowTransform = glm::lookAt(arrowPos, arrowPos - direction, glm::vec3(0, 0, 1));
+		
+		arrow.model = glm::mat4(1);
+		  
+		arrow.model *= glm::mat4(1, 0, 0, 0,
+					 0, 1, 0, 0,
+					 0, 0, 1, 0,
+					 0, 0, -1, 1);
+		arrow.model *= glm::inverse(arrowTransform);
+		
+		float alpha = 0.0f;
+		if(dist <= 50.0f)
+		  alpha = mapNum(dist, 70.0f, 0.0f, 0.0f, 1.0f);
+		if(dist <= 30.0f)
+		  alpha = 1.0f;
 	  
-	  arrow.render(cam, 1.0f, 1.0f, 1.0f, alpha);
-	}
+		arrow.render(cam, 1.0f, 1.0f, 1.0f, alpha);
+	      }
+	  }
       }
     }
     lastTime = currentTime;
