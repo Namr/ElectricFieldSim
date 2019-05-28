@@ -41,7 +41,7 @@ int main()
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
   // check OpenGL error
   GLenum err;
@@ -99,7 +99,7 @@ int main()
     
     if (glfwGetKey(window,GLFW_KEY_W ) == GLFW_PRESS)
     {
-      pitch -= speed * deltaTime;
+      pitch += speed * deltaTime;
     }
     if (glfwGetKey(window,GLFW_KEY_S ) == GLFW_PRESS)
     {
@@ -136,7 +136,7 @@ int main()
     
     if(glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE && posChargeKeyDown == 1)
     {
-      positiveCharges.push_back(position);
+      positiveCharges.push_back(glm::vec3(50.0f, 50.0f, 50.0f));
       posChargeKeyDown = 0;
     }
     if(glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE && negChargeKeyDown == 1)
@@ -177,15 +177,27 @@ int main()
 	for(int z = 0; z < edgeSize; z++)
 	{
 	  glm::vec3 arrowPos = glm::vec3(x * edgeSpace, y * edgeSpace, z * edgeSpace);
+	  glm::vec3 closestCharge = glm::vec3(50.0f, 50.0f, 50.0f);
+	  
+	  glm::vec3 direction = glm::normalize(arrowPos - closestCharge);
+	  glm::mat4 arrowTransform = glm::lookAt(arrowPos, closestCharge, glm::vec3(0, 0, 1));
+	  
 	  arrow.model = glm::mat4(1);
-	  arrow.model = glm::translate(arrow.model, arrowPos);
+	  
+	  arrow.model *= glm::mat4(1, 0, 0, 0,
+				   0, 1, 0, 0,
+				   0, 0, 1, 0,
+				   0, 0, -1, 1);
+	  arrow.model *= glm::inverse(arrowTransform);
 
-	  float dist = sqrt(pow(arrowPos.x - 50.0f, 2) + pow(arrowPos.y - 50.0f, 2) + pow(arrowPos.z - 50.0f, 2));
-
+			  
+	  float dist = sqrt(pow(arrowPos.x - closestCharge.x, 2) + pow(arrowPos.y - closestCharge.y, 2) + pow(arrowPos.z - closestCharge.z, 2));
 	  float alpha = 0.0f;
 	  if(dist <= 50.0f)
 	    alpha = mapNum(dist, 70.0f, 0.0f, 0.0f, 1.0f);
-
+	  if(dist <= 30.0f)
+	    alpha = 1.0f;
+	  
 	  arrow.render(cam, 1.0f, 1.0f, 1.0f, alpha);
 	}
       }
