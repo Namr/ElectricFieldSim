@@ -59,14 +59,12 @@ int main()
     );
 
   //init models for the point charges and field arrows, and the corresponding arrays that keep track of their data
-  Model charge;
-  charge = Model();
+  Model charge = Model(false);
   charge.loadFromObj("assets/sphere.obj", 0);
   std::vector<glm::vec3> positiveCharges;
   std::vector<glm::vec3> negativeCharges;
 
-  Model arrow;
-  arrow = Model();
+  Model arrow = Model(true);
   arrow.loadFromObj("assets/arrow.obj", 0);
   
   float lastTime;
@@ -159,12 +157,14 @@ int main()
     {
       charge.model = glm::mat4(1);
       charge.model = glm::translate(charge.model, pos);
+      charge.model = glm::scale(charge.model, glm::vec3(2.0f, 2.0f, 2.0f));
       charge.render(cam, 1.0f, 0.0f, 0.0f, 1.0f);
     }
     for(glm::vec3 pos : negativeCharges)
     {
       charge.model = glm::mat4(1);
       charge.model = glm::translate(charge.model, pos);
+      charge.model = glm::scale(charge.model, glm::vec3(2.0f, 2.0f, 2.0f));
       charge.render(cam, 0.0f, 0.0f, 1.0f, 1.0f);
     }
 

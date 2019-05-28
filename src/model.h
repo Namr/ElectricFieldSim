@@ -24,12 +24,13 @@ class Model
     unsigned int VAO, VBO, EBO;
     GLuint shaderProgram;
     GLint uniTrans, uniView, uniProj, uniColor, uniParent;
+    bool lit = false;
     std::vector<GLuint> triangles;
     std::vector<float> vertices;
     std::vector<float> normals;
 
 public:
-    Model();
+    Model(bool isLit);
     void loadFromObj(std::string path, int hasTextures);
     void loadFromNV(std::string path);
     void render(Camera &camera);

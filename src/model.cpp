@@ -2,11 +2,12 @@
 #include "model.h"
 
 
-Model::Model()
+Model::Model(bool isLit)
 {
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
     parentPosition = glm::mat4(1.0f);
+    lit = isLit;
 }
 
 void Model::loadFromObj(std::string path, int hasTextures)
@@ -64,9 +65,17 @@ void Model::GLInit()
 
     // load the shaders from their corresponding files
     GLuint vertexShader = loadShader("shaders/vertex.glsl", GL_VERTEX_SHADER);
-    GLuint fragmentShader =
-        loadShader("shaders/fragment.glsl", GL_FRAGMENT_SHADER);
 
+    GLuint fragmentShader = 0;
+    if(lit)
+    {
+      fragmentShader = loadShader("shaders/fragment.glsl", GL_FRAGMENT_SHADER);
+    }
+    else
+    {
+      fragmentShader = loadShader("shaders/unlitFragment.glsl", GL_FRAGMENT_SHADER);
+    }
+    
     // compile the GPU programs
     glCompileShader(vertexShader);
     glCompileShader(fragmentShader);
