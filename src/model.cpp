@@ -82,18 +82,22 @@ void Model::GLInit()
 
     // catch any errors
     GLint success;
+    GLchar infoLog[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
     if(!success)
     {
-      std::cout << "Shader Error vertex" << std::endl; 
+      glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+      std::cout << "Shader Error vertex: " << infoLog << std::endl;
+      
     }
     
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     
     if(!success)
     {
-      std::cout << "Shader Error fragment" << std::endl; 
+      glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+      std::cout << "Shader Error fragment: " << infoLog << std::endl; 
     }
     
     // create a program from the shaders
