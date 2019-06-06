@@ -73,10 +73,13 @@ int main()
   
   // setup camera movement vars
   double xpos, ypos;
+  glm::vec3 cursorPos;
+  
   glm::vec3 position = glm::vec3( 0, 0, 0);
   float speed = 3.0f; // 3 units / second
   float pitch = 0.0f;
   float yaw = 0.0f;
+  float cursorDist = 150.0f;
   
   //main loop
   while(!glfwWindowShouldClose(window))
@@ -88,8 +91,21 @@ int main()
     float deltaTime = currentTime - lastTime;
 
     glfwGetCursorPos(window,&xpos, &ypos);
-    glfwSetCursorPos(window,800/2, 600/2);
 
+    GLint viewportraw[4];
+    glGetIntegerv(GL_VIEWPORT, viewportraw);
+    glm::vec4 viewport = glm::vec4(viewportraw[0], viewportraw[1], viewportraw[2], viewportraw[3]);
+ 
+    // NORMALISED DEVICE SPACE
+    //xpos = xpos / 1920;
+    ypos = 1080 - ypos;
+    //ypos = ypos / 1080;
+
+    glm::vec3 v0 = glm::unProject(glm::vec3(xpos, ypos, 0.0f), cam.view, cam.proj, viewport);
+    glm::vec3 v1 = glm::unProject(glm::vec3(xpos, ypos, 1.0f), cam.view, cam.proj, viewport);
+    glm::vec3 dir = glm::normalize((v1 - v0));
+ 
+    cursorPos = position + (dir * cursorDist);
     
     /////////////////////////////////////////////////////////////////////////
     //recalculate camera position and direction based on mouse input and keys
@@ -134,12 +150,12 @@ int main()
     
     if(glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE && posChargeKeyDown == 1)
     {
-      positiveCharges.push_back(glm::vec3(50.0f, 50.0f, 50.0f));
+      positiveCharges.push_back(cursorPos);
       posChargeKeyDown = 0;
     }
     if(glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE && negChargeKeyDown == 1)
     {
-      negativeCharges.push_back(glm::vec3(80.0f, 80.0f, 80.0f));
+      negativeCharges.push_back(cursorPos);
       negChargeKeyDown = 0;
     }
 
