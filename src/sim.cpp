@@ -148,14 +148,18 @@ int main()
       negChargeKeyDown = 1;
     }
     
-    if(glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE && posChargeKeyDown == 1)
+    if(glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE && posChargeKeyDown == 1 && positiveCharges.size() < 10)
     {
       positiveCharges.push_back(cursorPos);
+      arrow.setIntUniform("activeReds", positiveCharges.size());
+      arrow.setVec3Uniform("redPositions", glm::value_ptr(positiveCharges[0]));
       posChargeKeyDown = 0;
     }
-    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE && negChargeKeyDown == 1)
+    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE && negChargeKeyDown == 1 && negativeCharges.size() < 10)
     {
       negativeCharges.push_back(cursorPos);
+      arrow.setIntUniform("activeBlues", negativeCharges.size());
+      arrow.setVec3Uniform("bluePositions", glm::value_ptr(negativeCharges[0]));
       negChargeKeyDown = 0;
     }
 

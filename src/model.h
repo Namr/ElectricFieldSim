@@ -33,6 +33,8 @@ public:
     Model(bool isLit);
     void loadFromObj(std::string path, int hasTextures);
     void loadFromNV(std::string path);
+    void setIntUniform(std::string name, int val);
+    void setVec3Uniform(std::string name, float* pointer);
     void render(Camera &camera);
     void render(Camera &camera, float r, float g, float b, float a);
     glm::mat4 model;

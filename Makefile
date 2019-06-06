@@ -6,6 +6,6 @@ all: build ${BUILD_FILES}
 clean:
 	-rm -rf build/
 build/%.o: src/%.cpp
-	g++ -std=c++11 -c -g -o $@ $^
+	g++ -std=c++11 -c -g -o $@ $^ 
 build:
 	mkdir build

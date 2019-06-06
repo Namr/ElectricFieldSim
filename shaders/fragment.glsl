@@ -5,6 +5,10 @@ in vec3 FragPos;
 in vec2 TexCoords;
 
 uniform vec4 objColor;
+uniform int activeBlues;
+uniform int activeReds;
+uniform vec3 redPositions[10];
+uniform vec3 bluePositions[10];
 
 out vec4 outColor;
 
@@ -12,19 +16,23 @@ vec3 computeDiffuse(vec3 color, vec3 pos);
 
 void main()
 {
-	vec3 lightColor = vec3(1.0, 0.0, 0.0);
-	vec3 lightPos = vec3(50.0, 50.0, 50.0);
-
+	vec3 redColor = vec3(1.0, 0.0, 0.0);
 	vec3 blueColor = vec3(0.0, 0.0, 1.0);
-	vec3 bluePos = vec3(80.0, 80.0, 80.0);
+	vec3 finalColor = vec3(0.0, 0.0, 0.0);
 	
-	vec3 diffuse = computeDiffuse(lightColor, lightPos);
-	vec3 blueDiff = computeDiffuse(blueColor, bluePos);
+	for(int i = 0; i < activeReds; i++)
+	{
+		vec3 redDiffuse = computeDiffuse(redColor, redPositions[i]);
+		finalColor += redDiffuse * objColor.rgb;
+	}
+
+	for(int i = 0; i < activeBlues; i++)
+	{
+		vec3 blueDiffuse = computeDiffuse(blueColor, bluePositions[i]);
+		finalColor += blueDiffuse * objColor.rgb;
+	}
 	
-	vec3 resultantColor = diffuse * objColor.rgb;
-	vec3 resultBlue = blueDiff * objColor.rgb;
-	
-	outColor = vec4(resultantColor + resultBlue, objColor.a);
+	outColor = vec4(finalColor, objColor.a);
 }
 
 vec3 computeDiffuse(vec3 color, vec3 pos)

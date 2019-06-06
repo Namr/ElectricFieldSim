@@ -161,6 +161,17 @@ void Model::render(Camera &camera)
     glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_INT, 0);
 }
 
+void Model::setIntUniform(std::string name, int val)
+{
+  GLint uniformLoc = glGetUniformLocation(shaderProgram, name.c_str());
+  glUniform1i(uniformLoc, val);
+}
+
+void Model::setVec3Uniform(std::string name, float* pointer)
+{
+  glUniform3fv(glGetUniformLocation(shaderProgram, name.c_str()), 10, pointer);
+}
+
 void Model::render(Camera &camera, float r, float g, float b, float a)
 {
     glUseProgram(shaderProgram);
